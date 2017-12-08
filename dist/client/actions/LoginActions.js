@@ -1,7 +1,7 @@
-import firebase from 'firebase';
+import firebase from "firebase";
 // import {AsyncStorage} from 'react-native'
-import { Actions } from 'react-native-router-flux';
-import { USER_UPDATE, USER_CREATE, USER_CREATE_FAIL, USER_CREATE_SUCCESS, LOGIN_UPDATE, LOGIN_CREATE, LOGIN_FAIL, LOGIN_FETCH_SUCCESS, USER_FETCH_SUCCESS, USER_FETCH_SINGLE } from '../types';
+import { Actions } from "react-native-router-flux";
+import { USER_UPDATE, USER_CREATE, USER_CREATE_FAIL, USER_CREATE_SUCCESS, LOGIN_UPDATE, LOGIN_CREATE, LOGIN_FAIL, LOGIN_FETCH_SUCCESS, USER_FETCH_SUCCESS, USER_FETCH_SINGLE } from "../types";
 export const userUpdate = ({ prop, value }) => {
     return {
         type: USER_UPDATE,
@@ -12,19 +12,19 @@ export const userUpdate = ({ prop, value }) => {
     };
 };
 export const userCreate = ({ name, email, password }) => {
-    return (dispatch) => {
+    return dispatch => {
         dispatch({ type: USER_CREATE });
         firebase
             .auth()
             .createUserWithEmailAndPassword(email, password)
-            .then((authData) => {
+            .then(authData => {
             firebase
                 .database()
                 .ref(`/users`)
                 .push({ name: name, email: authData.email, uid: authData.uid })
                 .then(() => {
                 dispatch({ type: USER_CREATE_SUCCESS });
-                Actions.login({ type: 'reset' });
+                Actions.login({ type: "reset" });
             });
         })
             .catch(error => userCreateFail(dispatch, error));
@@ -43,14 +43,14 @@ export const loginUpdate = ({ prop, value }) => {
     };
 };
 export const loginUser = ({ email, password }) => {
-    return (dispatch) => {
+    return dispatch => {
         dispatch({ type: LOGIN_CREATE });
         firebase
             .auth()
             .signInWithEmailAndPassword(email, password)
             .then(user => {
             loginUserSuccess(dispatch, user);
-            Actions.dash({ type: 'reset' });
+            Actions.dash({ type: "reset" });
         })
             .catch(error => loginUserFail(dispatch, error.message));
     };
@@ -61,24 +61,38 @@ const loginUserFail = (dispatch, error) => {
 const loginUserSuccess = (dispatch, user) => {
     dispatch({ type: LOGIN_FETCH_SUCCESS, payload: user });
 };
+export const forgetPassword = ({ email }) => {
+    return dispatch => {
+        dispatch({ type: LOGIN_CREATE });
+        firebase
+            .auth()
+            .sendPasswordResetEmail(email)
+            .then(() => {
+            Actions.login({ type: "reset" });
+        })
+            .catch(error => {
+            loginUserFail(dispatch, error.message);
+        });
+    };
+};
 export const logOut = () => {
-    return (dispatch) => {
+    return dispatch => {
         firebase
             .auth()
             .signOut()
             .then(() => {
             loginUserSuccess(dispatch, null);
-            Actions.login({ type: 'reset' });
+            Actions.login({ type: "reset" });
         })
             .catch(error => loginUserFail(dispatch, error.message));
     };
 };
 export const usersFetch = () => {
-    return (dispatch) => {
+    return dispatch => {
         firebase
             .database()
             .ref(`/users`)
-            .on('value', snapshot => {
+            .on("value", snapshot => {
             dispatch({
                 type: USER_FETCH_SUCCESS,
                 payload: snapshot.val()
@@ -86,8 +100,8 @@ export const usersFetch = () => {
         });
     };
 };
-export const userFetchById = (uid) => {
-    return (dispatch) => {
+export const userFetchById = uid => {
+    return dispatch => {
         dispatch({ type: USER_FETCH_SINGLE, payload: uid });
     };
 };

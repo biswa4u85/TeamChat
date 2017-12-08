@@ -26,8 +26,6 @@ export default class App extends Component {
         Actions.logout();
     }
     render() {
-        // const store = store;
-        // const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
         return (React.createElement(Provider, { store: store },
             React.createElement(Router, null,
                 React.createElement(Stack, { key: "root" },
